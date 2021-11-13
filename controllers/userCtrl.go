@@ -325,12 +325,18 @@ func (s userController) UpdateSomeFieldUser(c *fiber.Ctx) error {
 	var result map[string]interface{}
 	json.Unmarshal([]byte(c.Body()), &result)
 
-	fmt.Println(result)
+	/* 	fmt.Println(result) */
 
 	user := models.User{}
 
 	if tx := s.db.Model(&user).Where("id = ?", userId).Updates(result); tx.Error != nil {
-		return services.InternalErrorResponse(c)
+		fmt.Println(tx.RowsAffected)
+		if tx.RowsAffected == 0 {
+			return services.MissingAndInvalidResponse(c)
+		} else {
+			return services.InternalErrorResponse(c)
+		}
+
 	}
 
 	if tx := s.db.First(&user, userId); tx.Error != nil {

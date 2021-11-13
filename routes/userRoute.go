@@ -18,6 +18,7 @@ func UserRoute(app *fiber.App, db *gorm.DB) {
 
 	user.Get("/me", controllers.NewUserController(db).GetUserByMe)
 
+	user.Use("/", middleware.AuthConfig, middleware.NewAuthMiddleware(db).CheckAuthFromId)
 	user.Get("/", controllers.NewUserController(db).GetAllUsers)
 
 	user.Put("/change-password", controllers.NewUserController(db).ChangePassword)

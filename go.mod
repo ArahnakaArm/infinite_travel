@@ -40,6 +40,7 @@ require (
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.42.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gofiber/fiber v1.13.3 // indirect
 	github.com/gofiber/jwt/v2 v2.2.7
@@ -47,4 +48,9 @@ require (
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
+)
+
+require (
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 )

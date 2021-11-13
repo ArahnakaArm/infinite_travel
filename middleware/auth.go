@@ -44,14 +44,24 @@ func (m authMiddleware) CheckAuthFromId(c *fiber.Ctx) error {
 
 	splitToken := strings.Split(c.Get("authorization"), "Bearer ")
 	reqToken := splitToken[1]
-	token, err := jwt.Parse(reqToken, nil)
+	token, _ := jwt.Parse(reqToken, nil)
+
 	if token == nil {
-		return err
+		return services.UnAuthorizedResponse(c)
 	}
+
+	/* if err != nil {
+		fmt.Println(err)
+		return services.UnAuthorizedResponse(c)
+	}
+	*/
 	claims, _ := token.Claims.(jwt.MapClaims)
 	id := claims["id"]
 
-	_ = id
+	user := models.User{}
+	if tx := m.db.First(&user, id); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
 
 	return c.Next()
 
@@ -65,10 +75,15 @@ func (m authMiddleware) CheckAuthFromIdAdmin(c *fiber.Ctx) error {
 	}
 
 	reqToken := splitToken[1]
-	token, err := jwt.Parse(reqToken, nil)
+	token, _ := jwt.Parse(reqToken, nil)
 	if token == nil {
-		return err
+		return services.UnAuthorizedResponse(c)
 	}
+
+	/* 	if err != nil {
+	   		return services.UnAuthorizedResponse(c)
+	   	}
+	*/
 	claims, _ := token.Claims.(jwt.MapClaims)
 	id := claims["id"]
 

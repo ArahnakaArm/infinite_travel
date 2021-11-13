@@ -23,6 +23,7 @@ func main() {
 	db := initDB()
 
 	routes.UserRoute(app, db)
+	routes.UploadFileRoute(app, db)
 
 	app.Listen(fmt.Sprintf("%s:%s", viper.GetString("app.ip"), viper.GetString("app.port")))
 	/* userRepo := repositories.NewUserRepository(db)
