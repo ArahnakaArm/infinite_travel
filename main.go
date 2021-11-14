@@ -22,8 +22,7 @@ func main() {
 
 	db := initDB()
 
-	routes.UserRoute(app, db)
-	routes.UploadFileRoute(app, db)
+	loadRoutes(app, db)
 
 	app.Listen(fmt.Sprintf("%s:%s", viper.GetString("app.ip"), viper.GetString("app.port")))
 	/* userRepo := repositories.NewUserRepository(db)
@@ -78,4 +77,10 @@ func initDB() *gorm.DB {
 
 	return db
 
+}
+
+func loadRoutes(app *fiber.App, db *gorm.DB) {
+	routes.UserRoute(app, db)
+	routes.UploadFileRoute(app, db)
+	routes.ExploreRoute(app, db)
 }
