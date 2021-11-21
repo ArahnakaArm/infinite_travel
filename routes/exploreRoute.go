@@ -17,5 +17,9 @@ func ExploreRoute(app *fiber.App, db *gorm.DB) {
 
 	explore.Post("/content/:exploreId", controllers.NewExploreController(db).CreateExploreContent)
 
-	explore.Get("/:id", controllers.NewExploreController(db).GetExplore)
+	explore.Get("/:id", controllers.NewExploreController(db).GetExploreById)
+
+	explore.Get("/", controllers.NewExploreController(db).GetExplores)
+
+	explore.Delete("/:id", controllers.NewExploreController(db).DeleteExplore)
 }
