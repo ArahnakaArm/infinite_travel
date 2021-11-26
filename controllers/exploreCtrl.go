@@ -39,7 +39,9 @@ func (s exploreController) CreateExplore(c *fiber.Ctx) error {
 	}
 
 	explore := models.Explore{
-		Header: exploreRequest.Header,
+		Header:   exploreRequest.Header,
+		Author:   exploreRequest.Author,
+		ImageUrl: exploreRequest.ImageUrl,
 	}
 
 	if tx := s.db.Create(&explore); tx.Error != nil {
@@ -131,7 +133,7 @@ func (s exploreController) GetExplores(c *fiber.Ctx) error {
 
 	exploresTotal := []models.Explore{}
 
-	if tx := s.db.Limit(limit).Offset(offset).Preload("Content").Find(&explores); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Content").Find(&explores); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
