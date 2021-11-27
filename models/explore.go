@@ -8,8 +8,9 @@ import (
 
 type Explore struct {
 	ExploreId uint             `gorm:"PRIMARY_KEY" json:"exploreId"`
-	Header    string           `gorm:"not null" json:"header"`
+	Title     string           `gorm:"not null" json:"title"`
 	Author    string           `gorm:"not null" json:"author"`
+	Paragraph string           `gorm:"not null" json:"paragraph"`
 	ImageUrl  string           `gorm:"not null" json:"image_url"`
 	Content   []ExploreContent `gorm:"foreignkey:explore_id" json:"content"`
 	CreatedAt time.Time        `json:"created_at"`
@@ -20,7 +21,7 @@ type Explore struct {
 type ExploreContent struct {
 	ExploreContentId uint           `gorm:"PRIMARY_KEY"`
 	ExploreId        uint           `gorm:"column:explore_id"`
-	Header           string         `gorm:"not null" json:"header"`
+	Title            string         `gorm:"not null" json:"title"`
 	Body             string         `gorm:"not null" json:"body"`
 	ImageUrl         string         `gorm:"not null" json:"image_url"`
 	CreatedAt        time.Time      `json:"created_at"`
@@ -29,14 +30,15 @@ type ExploreContent struct {
 }
 
 type ExploreRequest struct {
-	Header   string `gorm:"not null" json:"header"`
-	Author   string `gorm:"not null" json:"author"`
-	ImageUrl string `gorm:"not null" json:"image_url"`
+	Title     string `gorm:"not null" json:"title"`
+	Author    string `gorm:"not null" json:"author"`
+	Paragraph string `gorm:"not null" json:"paragraph"`
+	ImageUrl  string `gorm:"not null" json:"image_url"`
 }
 
 type ExploreContentRequest struct {
 	ExploreId uint   `gorm:"column:explore_id"`
-	Header    string `gorm:"not null" json:"header"`
+	Title     string `gorm:"not null" json:"title"`
 	Body      string `gorm:"not null" json:"body"`
 	ImageUrl  string `gorm:"not null" json:"image_url"`
 }

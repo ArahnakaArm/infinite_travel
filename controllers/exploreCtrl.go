@@ -25,6 +25,7 @@ type exploreController struct {
 func NewExploreController(db *gorm.DB) ExploreController {
 	db.AutoMigrate(models.Explore{})
 	db.AutoMigrate(models.ExploreContent{})
+
 	return exploreController{db}
 }
 
@@ -39,9 +40,10 @@ func (s exploreController) CreateExplore(c *fiber.Ctx) error {
 	}
 
 	explore := models.Explore{
-		Header:   exploreRequest.Header,
-		Author:   exploreRequest.Author,
-		ImageUrl: exploreRequest.ImageUrl,
+		Title:     exploreRequest.Title,
+		Author:    exploreRequest.Author,
+		Paragraph: exploreRequest.Paragraph,
+		ImageUrl:  exploreRequest.ImageUrl,
 	}
 
 	if tx := s.db.Create(&explore); tx.Error != nil {
@@ -70,7 +72,7 @@ func (s exploreController) CreateExploreContent(c *fiber.Ctx) error {
 
 	exploreContent := models.ExploreContent{
 		ExploreId: uint(intVar),
-		Header:    exploreContentRequest.Header,
+		Title:     exploreContentRequest.Title,
 		Body:      exploreContentRequest.Body,
 		ImageUrl:  exploreContentRequest.ImageUrl,
 	}
