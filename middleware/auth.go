@@ -58,6 +58,10 @@ func (m authMiddleware) CheckAuthFromId(c *fiber.Ctx) error {
 	claims, _ := token.Claims.(jwt.MapClaims)
 	id := claims["id"]
 
+	if id == nil {
+		return services.UnAuthorizedResponse(c)
+	}
+
 	user := models.User{}
 	if tx := m.db.First(&user, id); tx.Error != nil {
 		return services.InternalErrorResponse(c)
@@ -88,6 +92,10 @@ func (m authMiddleware) CheckAuthFromIdAdmin(c *fiber.Ctx) error {
 	id := claims["id"]
 
 	user := models.User{}
+
+	if id == nil {
+		return services.UnAuthorizedResponse(c)
+	}
 
 	if tx := m.db.First(&user, id); tx.Error != nil {
 		return services.InternalErrorResponse(c)

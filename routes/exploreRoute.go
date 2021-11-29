@@ -2,6 +2,7 @@ package routes
 
 import (
 	"intravel/controllers"
+	"intravel/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -13,7 +14,7 @@ func ExploreRoute(app *fiber.App, db *gorm.DB) {
 
 	explore := v1.Group("explore")
 
-	explore.Post("/", controllers.NewExploreController(db).CreateExplore)
+	explore.Post("/", middleware.NewAuthMiddleware(db).CheckAuthFromIdAdmin, controllers.NewExploreController(db).CreateExplore)
 
 	explore.Post("/content/:exploreId", controllers.NewExploreController(db).CreateExploreContent)
 
