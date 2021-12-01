@@ -26,6 +26,9 @@ func NewExploreController(db *gorm.DB) ExploreController {
 	db.AutoMigrate(models.Explore{})
 	db.AutoMigrate(models.ExploreContent{})
 
+	db.Migrator().DropColumn(&models.ExploreContent{}, "body")
+	db.Migrator().DropColumn(&models.ExploreContent{}, "header")
+
 	return exploreController{db}
 }
 
@@ -73,7 +76,7 @@ func (s exploreController) CreateExploreContent(c *fiber.Ctx) error {
 	exploreContent := models.ExploreContent{
 		ExploreId: uint(intVar),
 		Title:     exploreContentRequest.Title,
-		Body:      exploreContentRequest.Body,
+		Paragraph: exploreContentRequest.Paragraph,
 		ImageUrl:  exploreContentRequest.ImageUrl,
 	}
 

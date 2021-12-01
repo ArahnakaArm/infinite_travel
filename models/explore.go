@@ -22,7 +22,7 @@ type ExploreContent struct {
 	ExploreContentId uint           `gorm:"PRIMARY_KEY"`
 	ExploreId        uint           `gorm:"column:explore_id"`
 	Title            string         `gorm:"not null" json:"title"`
-	Body             string         `gorm:"not null" json:"body"`
+	Paragraph        string         `gorm:"not null" json:"paragraph"`
 	ImageUrl         string         `gorm:"not null" json:"image_url"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
@@ -39,6 +39,6 @@ type ExploreRequest struct {
 type ExploreContentRequest struct {
 	ExploreId uint   `gorm:"column:explore_id"`
 	Title     string `gorm:"not null" json:"title"`
-	Body      string `gorm:"not null" json:"body"`
+	Paragraph string `gorm:"not null" json:"paragraph"`
 	ImageUrl  string `gorm:"not null" json:"image_url"`
 }
