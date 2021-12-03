@@ -67,21 +67,26 @@ func (s exploreController) CreateExploreContent(c *fiber.Ctx) error {
 	if err := c.BodyParser(&exploreContentRequest); err != nil {
 		return services.MissingAndInvalidResponse(c)
 	}
-	intVar, err := strconv.Atoi(c.Params("exploreId"))
+	intVarId, err := strconv.Atoi(c.Params("exploreId"))
 
 	if err != nil {
 		return services.MissingAndInvalidResponse(c)
 	}
 
 	exploreContent := models.ExploreContent{
-		ExploreId: uint(intVar),
+		ExploreId: uint(intVarId),
 		Title:     exploreContentRequest.Title,
 		Paragraph: exploreContentRequest.Paragraph,
 		ImageUrl:  exploreContentRequest.ImageUrl,
 	}
 
 	if tx := s.db.Create(&exploreContent); tx.Error != nil {
-		return services.InternalErrorResponse(c)
+		if tx.RowsAffected == 0 {
+			return services.NotFoundResponse(c)
+		} else {
+			return services.InternalErrorResponse(c)
+		}
+
 	}
 
 	return services.CreatedResponse(c)
