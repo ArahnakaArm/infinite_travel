@@ -55,3 +55,10 @@ func UnAuthorizedResponse(c *fiber.Ctx) error {
 		"resultMessage": responseMessage.RESULT_UNAUTHORIZED,
 	})
 }
+
+func ConflictResponse(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusConflict * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_CONFLICT,
+	})
+}

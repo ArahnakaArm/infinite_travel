@@ -83,4 +83,6 @@ func loadRoutes(app *fiber.App, db *gorm.DB) {
 	routes.UserRoute(app, db)
 	routes.UploadFileRoute(app, db)
 	routes.ExploreRoute(app, db)
+	routes.CustomerRoute(app, db)
+	routes.TicketRoute(app, db)
 }
