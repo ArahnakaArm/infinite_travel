@@ -30,15 +30,15 @@ type ExploreContent struct {
 }
 
 type ExploreRequest struct {
-	Title     string `gorm:"not null" json:"title"`
-	Author    string `gorm:"not null" json:"author"`
-	Paragraph string `gorm:"not null" json:"paragraph"`
-	ImageUrl  string `gorm:"not null" json:"image_url"`
+	Title     string `gorm:"not null" json:"title" validate:"nonnil,nonzero"`
+	Author    string `gorm:"not null" json:"author" validate:"nonnil,nonzero"`
+	Paragraph string `gorm:"not null" json:"paragraph" validate:"nonnil,nonzero"`
+	ImageUrl  string `gorm:"not null" json:"image_url" validate:"nonnil,nonzero"`
 }
 
 type ExploreContentRequest struct {
-	ExploreId uint   `gorm:"column:explore_id"`
-	Title     string `gorm:"not null" json:"title"`
-	Paragraph string `gorm:"not null" json:"paragraph"`
-	ImageUrl  string `gorm:"not null" json:"image_url"`
+	ExploreId uint   `gorm:"column:explore_id" validate:"nonnil,nonzero"`
+	Title     string `gorm:"not null" json:"title" validate:"nonnil,nonzero"`
+	Paragraph string `gorm:"not null" json:"paragraph" validate:"nonnil,nonzero"`
+	ImageUrl  string `gorm:"not null" json:"image_url" validate:"nonnil,nonzero"`
 }

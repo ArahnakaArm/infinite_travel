@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
 
@@ -42,6 +43,10 @@ func (s exploreController) CreateExplore(c *fiber.Ctx) error {
 		return services.MissingAndInvalidResponse(c)
 	}
 
+	if errs := validator.Validate(exploreRequest); errs != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
 	explore := models.Explore{
 		Title:     exploreRequest.Title,
 		Author:    exploreRequest.Author,
@@ -67,6 +72,11 @@ func (s exploreController) CreateExploreContent(c *fiber.Ctx) error {
 	if err := c.BodyParser(&exploreContentRequest); err != nil {
 		return services.MissingAndInvalidResponse(c)
 	}
+
+	if errs := validator.Validate(exploreContentRequest); errs != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
 	intVarId, err := strconv.Atoi(c.Params("exploreId"))
 
 	if err != nil {
