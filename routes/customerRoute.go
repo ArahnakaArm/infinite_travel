@@ -13,6 +13,7 @@ func CustomerRoute(app *fiber.App, db *gorm.DB) {
 
 	customer := v1.Group("customer")
 
-	customer.Post("/", controllers.NewCustomerController(db).CreateCustomer)
+	customer.Post("/register", controllers.NewCustomerController(db).CreateCustomer)
 
+	customer.Get("/", controllers.NewCustomerController(db).GetAllCustomers)
 }

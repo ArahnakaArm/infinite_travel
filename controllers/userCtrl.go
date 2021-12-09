@@ -72,7 +72,6 @@ func (s userController) Register(c *fiber.Ctx) error {
 
 	s.db.Create(&user)
 
-	fmt.Println("Test Register")
 	return services.CreatedResponse(c)
 }
 

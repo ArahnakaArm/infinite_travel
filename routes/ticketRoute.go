@@ -15,4 +15,6 @@ func TicketRoute(app *fiber.App, db *gorm.DB) {
 
 	ticket.Post("/", controllers.NewTicketController(db).CreateTicket)
 
+	ticket.Get("/", controllers.NewTicketController(db).GetAllTickets)
+
 }

@@ -85,4 +85,5 @@ func loadRoutes(app *fiber.App, db *gorm.DB) {
 	routes.ExploreRoute(app, db)
 	routes.CustomerRoute(app, db)
 	routes.TicketRoute(app, db)
+	routes.FlightRoute(app, db)
 }

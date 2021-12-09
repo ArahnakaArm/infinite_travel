@@ -8,6 +8,8 @@ import (
 
 type Customer struct {
 	CustomerId   string         `gorm:"PRIMARY_KEY" json:"customer_id"`
+	UserName     string         `gorm:"not null" json:"user_name"`
+	Password     string         `gorm:"not null" json:"password"`
 	FirstName    string         `gorm:"not null" json:"first_name"`
 	LastName     string         `gorm:"not null" json:"last_name"`
 	MiddleName   string         `json:"middle_name"`
@@ -16,6 +18,7 @@ type Customer struct {
 	MobileNumber string         `gorm:"not null;unique" json:"mobile_number"`
 	Nation       string         `gorm:"not null" json:"nation"`
 	Gender       string         `gorm:"not null" json:"gender"`
+	Ticket       []Ticket       `gorm:"foreignkey:customer_id" json:"ticket"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at"`

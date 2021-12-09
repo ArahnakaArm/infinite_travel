@@ -3,6 +3,7 @@ package controllers
 import (
 	"intravel/models"
 	"intravel/services"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	uuid "github.com/nu7hatch/gouuid"
@@ -11,6 +12,7 @@ import (
 
 type CustomerController interface {
 	CreateCustomer(c *fiber.Ctx) error
+	GetAllCustomers(c *fiber.Ctx) error
 }
 
 type customerController struct {
@@ -23,6 +25,8 @@ func NewCustomerController(db *gorm.DB) CustomerController {
 	return customerController{db}
 }
 
+/////////////////////////////// Create Customer ///////////////////////////////
+
 func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 
 	customerReq := models.Customer{}
@@ -33,13 +37,23 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 		return services.MissingAndInvalidResponse(c)
 	}
 
+	if !validateEmail(customerReq.UserName) {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	hashedPass, err := hashPassword(customerReq.Password)
+
+	if err != nil {
+		return services.InternalErrorResponse(c)
+	}
+
 	uId, err := uuid.NewV4()
 
 	if err != nil {
 		return services.InternalErrorResponse(c)
 	}
 
-	tx := s.db.Where("id_card = ? OR visa_number = ? OR mobile_number = ?", customerReq.IdCard, customerReq.VisaNumber, customerReq.MobileNumber).Find(&custModel)
+	tx := s.db.Where("id_card = ? OR visa_number = ? OR mobile_number = ? OR user_name = ?", customerReq.IdCard, customerReq.VisaNumber, customerReq.MobileNumber, customerReq.UserName).Find(&custModel)
 
 	if tx.Error != nil {
 		return services.InternalErrorResponse(c)
@@ -51,6 +65,8 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 
 	customer := models.Customer{
 		CustomerId:   uId.String(),
+		UserName:     customerReq.UserName,
+		Password:     hashedPass,
 		FirstName:    customerReq.FirstName,
 		LastName:     customerReq.LastName,
 		MiddleName:   customerReq.MiddleName,
@@ -65,5 +81,47 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 		return services.InternalErrorResponse(c)
 	}
 
-	return nil
+	return services.CreatedResponse(c)
 }
+
+/////////////////////////////// End Create Customer ///////////////////////////////
+
+/////////////////////////////// Get Customers //////////////////////////////////////
+
+func (s customerController) GetAllCustomers(c *fiber.Ctx) error {
+	offset := -1
+	limit := -1
+
+	if c.Query("limit") != "" {
+		limitInt, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		limit = limitInt
+	}
+
+	if c.Query("offset") != "" {
+		offsetInt, err := strconv.Atoi(c.Query("offset"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		offset = offsetInt
+	}
+
+	customers := []models.Customer{}
+	customersTotal := []models.Customer{}
+
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Ticket").Preload("Ticket.Flight").Find(&customers); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	if tx := s.db.Find(&customersTotal); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResDataRowCount(c, customers, len(customers), len(customersTotal))
+}
+
+/////////////////////////////// End Get Customers //////////////////////////////////////

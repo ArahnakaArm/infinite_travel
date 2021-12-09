@@ -14,6 +14,24 @@ func SuccessResponse(c *fiber.Ctx) error {
 	})
 }
 
+func SuccessResponseResData(c *fiber.Ctx, data interface{}) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusOK * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_SUCCESS,
+		"resultData":    data,
+	})
+}
+
+func SuccessResponseResDataRowCount(c *fiber.Ctx, data interface{}, rowCount int, totalCount int) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusOK * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_SUCCESS,
+		"resultData":    data,
+		"rowCount":      rowCount,
+		"totalCount":    totalCount,
+	})
+}
+
 func CreatedResponse(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"resultCode":    strconv.Itoa(fiber.StatusCreated * 100),
