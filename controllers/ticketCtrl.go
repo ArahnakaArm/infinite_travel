@@ -63,9 +63,6 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 
 	////// Mock
 
-	airlineId := "152-daf-6512"
-	planeId := "152-daf-6512-592d"
-
 	//////
 
 	ticket := models.Ticket{
@@ -74,8 +71,6 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 		FlightId:     ticketReqBody.FlightId,
 		Status:       ticketReqBody.Status,
 		TicketNumber: flightTicket,
-		AirlineId:    airlineId,
-		PlaneId:      planeId,
 		Seat:         seat,
 	}
 
@@ -127,7 +122,7 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 	tickets := []models.Ticket{}
 	ticketsTotal := []models.Ticket{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Find(&tickets); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Find(&tickets); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
