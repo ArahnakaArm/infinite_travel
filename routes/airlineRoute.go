@@ -15,4 +15,6 @@ func AirlineRoute(app *fiber.App, db *gorm.DB) {
 
 	customer.Post("/", controllers.NewAirlineController(db).CreateAirline)
 
+	customer.Get("/", controllers.NewAirlineController(db).GetAllAirline)
+
 }

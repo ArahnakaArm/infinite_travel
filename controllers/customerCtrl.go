@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"intravel/models"
 	"intravel/services"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 )
 
@@ -47,8 +47,6 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 		return services.InternalErrorResponse(c)
 	}
 
-	uId, err := uuid.NewV4()
-
 	if err != nil {
 		return services.InternalErrorResponse(c)
 	}
@@ -63,8 +61,13 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 		return services.ConflictResponse(c)
 	}
 
+	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	customer := models.Customer{
-		CustomerId:   uId.String(),
+		CustomerId:   uint(u64),
 		UserName:     customerReq.UserName,
 		Password:     hashedPass,
 		FirstName:    customerReq.FirstName,
@@ -113,7 +116,7 @@ func (s customerController) GetAllCustomers(c *fiber.Ctx) error {
 	customers := []models.Customer{}
 	customersTotal := []models.Customer{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Ticket").Preload("Ticket.Flight").Find(&customers); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Tickets").Preload("Tickets.Flight").Find(&customers); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

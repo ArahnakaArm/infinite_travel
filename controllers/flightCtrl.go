@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"intravel/models"
 	"intravel/services"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 )
 
@@ -33,15 +33,16 @@ func (s flightController) CreateFlight(c *fiber.Ctx) error {
 		return services.MissingAndInvalidResponse(c)
 	}
 
-	uId, err := uuid.NewV4()
-
+	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
 	if err != nil {
-		return services.InternalErrorResponse(c)
+		fmt.Println(err)
 	}
 
 	flight := models.Flight{
-		FlightId:   uId.String(),
+		FlightId:   uint(u64),
 		FlightName: flightReqBody.FlightName,
+		AirlineId:  flightReqBody.AirlineId,
+		PlaneMId:   flightReqBody.PlaneMId,
 	}
 
 	if tx := s.db.Create(&flight); tx.Error != nil {
@@ -73,16 +74,16 @@ func (s flightController) GetAllFlight(c *fiber.Ctx) error {
 		offset = offsetInt
 	}
 
-	tickets := []models.Ticket{}
-	ticketsTotal := []models.Ticket{}
+	flights := []models.Flight{}
+	flightsTotal := []models.Flight{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Find(&tickets); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneM").Preload("Airline").Find(&flights); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Find(&ticketsTotal); tx.Error != nil {
+	if tx := s.db.Find(&flightsTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	return services.SuccessResponseResDataRowCount(c, tickets, len(tickets), len(ticketsTotal))
+	return services.SuccessResponseResDataRowCount(c, flights, len(flights), len(flightsTotal))
 }

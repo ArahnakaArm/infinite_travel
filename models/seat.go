@@ -7,8 +7,8 @@ import (
 )
 
 type Seat struct {
-	SeatId     string         `gorm:"PRIMARY_KEY" json:"seat_id"`
-	FlightId   string         `gorm:"column:flight_id;not null" json:"flight_id"`
+	SeatId     uint           `gorm:"PRIMARY_KEY;autoIncrement:false" json:"seat_id"`
+	FlightId   uint           ` json:"flight_id"`
 	SeatNumber string         `gorm:"not null" json:"seat_number"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`

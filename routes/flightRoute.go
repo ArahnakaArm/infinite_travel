@@ -11,8 +11,10 @@ func FlightRoute(app *fiber.App, db *gorm.DB) {
 
 	v1 := app.Group("/v1")
 
-	ticket := v1.Group("flight")
+	flight := v1.Group("flight")
 
-	ticket.Post("/", controllers.NewFlightController(db).CreateFlight)
+	flight.Post("/", controllers.NewFlightController(db).CreateFlight)
+
+	flight.Get("/", controllers.NewFlightController(db).GetAllFlight)
 
 }

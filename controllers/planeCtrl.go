@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"fmt"
 	"intravel/models"
 	"intravel/services"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 )
 
@@ -39,14 +40,13 @@ func (s planeController) CreatePlane(c *fiber.Ctx) error {
 		return services.ConflictResponse(c)
 	}
 
-	uId, err := uuid.NewV4()
-
+	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
 	if err != nil {
-		return services.InternalErrorResponse(c)
+		fmt.Println(err)
 	}
 
 	plane := models.PlaneM{
-		PlaneId:   uId.String(),
+		PlaneId:   uint(u64),
 		AirlineId: planeReq.AirlineId,
 		PlaneName: planeReq.PlaneName,
 		PlaneCode: planeReq.PlaneCode,

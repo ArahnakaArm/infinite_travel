@@ -1,16 +1,18 @@
 package controllers
 
 import (
+	"fmt"
 	"intravel/models"
 	"intravel/services"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 )
 
 type AirlineController interface {
 	CreateAirline(c *fiber.Ctx) error
+	GetAllAirline(c *fiber.Ctx) error
 }
 
 type airlineController struct {
@@ -40,14 +42,13 @@ func (s airlineController) CreateAirline(c *fiber.Ctx) error {
 		return services.ConflictResponse(c)
 	}
 
-	uId, err := uuid.NewV4()
-
+	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
 	if err != nil {
-		return services.InternalErrorResponse(c)
+		fmt.Println(err)
 	}
 
 	airlineStore := models.Airline{
-		AirlineId:   uId.String(),
+		AirlineId:   uint(u64),
 		AirlineName: airlineReq.AirlineName,
 		AirlineCode: airlineReq.AirlineCode,
 		Status:      airlineReq.Status,
@@ -59,5 +60,42 @@ func (s airlineController) CreateAirline(c *fiber.Ctx) error {
 	}
 
 	return services.CreatedResponse(c)
+
+}
+
+func (s airlineController) GetAllAirline(c *fiber.Ctx) error {
+	offset := -1
+	limit := -1
+
+	if c.Query("limit") != "" {
+		limitInt, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		limit = limitInt
+	}
+
+	if c.Query("offset") != "" {
+		offsetInt, err := strconv.Atoi(c.Query("offset"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		offset = offsetInt
+	}
+
+	airlines := []models.Airline{}
+	airlineTotal := []models.Airline{}
+
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneServices").Find(&airlines); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	if tx := s.db.Find(&airlineTotal); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResDataRowCount(c, airlines, len(airlines), len(airlineTotal))
 
 }

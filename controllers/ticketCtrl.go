@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"intravel/models"
 	"intravel/services"
-	"math/rand"
 	"strconv"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
-	uuid "github.com/nu7hatch/gouuid"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +20,10 @@ type ticketController struct {
 }
 
 func NewTicketController(db *gorm.DB) TicketController {
+
+	/* db.AutoMigrate(models.UserTest{})
+	db.AutoMigrate(models.CreditCard{})
+	*/
 	db.AutoMigrate(models.Ticket{})
 	db.AutoMigrate(models.Seat{})
 
@@ -35,12 +36,6 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&ticketReqBody); err != nil {
 		return services.MissingAndInvalidResponse(c)
-	}
-
-	uId, err := uuid.NewV4()
-
-	if err != nil {
-		return services.InternalErrorResponse(c)
 	}
 
 	flight := models.Flight{}
@@ -65,8 +60,13 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 
 	//////
 
+	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	ticket := models.Ticket{
-		TicketId:     uId.String(),
+		TicketId:     uint(u64),
 		CustomerId:   ticketReqBody.CustomerId,
 		FlightId:     ticketReqBody.FlightId,
 		Status:       ticketReqBody.Status,
@@ -78,14 +78,13 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 		return services.InternalErrorResponse(c)
 	}
 
-	uIdSeat, err := uuid.NewV4()
-
+	u64Seat, err := strconv.ParseUint(getNumber12digit(), 12, 64)
 	if err != nil {
-		return services.InternalErrorResponse(c)
+		fmt.Println(err)
 	}
 
 	seatInsert := models.Seat{
-		SeatId:     uIdSeat.String(),
+		SeatId:     uint(u64Seat),
 		SeatNumber: seat,
 		FlightId:   ticketReqBody.FlightId,
 	}
@@ -131,38 +130,4 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 	}
 
 	return services.SuccessResponseResDataRowCount(c, tickets, len(tickets), len(ticketsTotal))
-}
-
-func getTicketNumber() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	var codes [6]byte
-	for i := 0; i < 6; i++ {
-		codes[i] = uint8(48 + r.Intn(10))
-	}
-
-	return string(codes[:])
-}
-
-func getSeatNumber() string {
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	var codes [2]byte
-	for i := 0; i < 2; i++ {
-		codes[i] = uint8(48 + r.Intn(5))
-	}
-
-	return string(codes[:])
-}
-
-func generateTicket(flightName string) string {
-
-	return fmt.Sprintf("%s-%s", flightName, getTicketNumber())
-}
-
-func generateSeat() string {
-
-	randomSeatChar := 'A' + rune(rand.Intn(6))
-
-	return fmt.Sprintf("%s-%s", string(randomSeatChar), getSeatNumber())
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"intravel/models"
 	"intravel/services"
-	"net/mail"
 	"strconv"
 	"strings"
 	"time"
@@ -365,13 +364,3 @@ func (s userController) DeleteUser(c *fiber.Ctx) error {
 }
 
 ////////////////////////////////// End Delete User  ///////////////////////////////////////
-
-func validateEmail(email string) bool {
-	_, err := mail.ParseAddress(email)
-	return err == nil
-}
-
-func hashPassword(pass string) (hashedPassword string, err error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(pass), 14)
-	return string(bytes), err
-}

@@ -7,18 +7,62 @@ import (
 )
 
 type Ticket struct {
-	TicketId     string `gorm:"PRIMARY_KEY" json:"ticket_id"`
-	CustomerId   string `gorm:"column:customer_id;not null" json:"customer_id"`
-	TicketNumber string `gorm:"not null" json:"ticket_number"`
-	FlightId     string `gorm:"column:flight_id" json:"flight_id"`
-	Flight       Flight `json:"flight"`
-	/* 	AirlineId    string         `gorm:"column:airline_id" json:"airline_id"`
-	   	Airline      Airline        `json:"airline"`
-	   	PlaneId      string         `gorm:"column:plane_id" json:"plane_id"`
-	   	Plane        Plane          `json:"plane"` */
-	Seat      string         `gorm:"not null;unique" json:"seat"`
-	Status    string         `gorm:"not null" json:"status"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
+	TicketId     uint           `gorm:"PRIMARY_KEY;autoIncrement:false" json:"ticket_id"`
+	CustomerId   uint           `json:"customer_id"`
+	TicketNumber string         `gorm:"not null" json:"ticket_number"`
+	FlightId     uint           `json:"flight_id"`
+	Flight       Flight         `json:"flight"`
+	Seat         string         `gorm:"not null;unique" json:"seat"`
+	Status       string         `gorm:"not null" json:"status"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 }
+
+/* type UserTest struct {
+	MemberNumber string       `gorm:"PRIMARY_KEY" json:"member_number"`
+	CreditCards  []CreditCard `gorm:"foreignKey:user_number;references:member_number"`
+}
+
+type CreditCard struct {
+	gorm.Model
+	Number     string
+	UserNumber string `json:"user_number"`
+}
+*/
+
+/* type UserTest struct {
+	UserTestId  uint         `gorm:"PRIMARY_KEY"`
+	CreditCards []CreditCard `gorm:"foreignKey:UserRefer"`
+}
+
+type CreditCard struct {
+	CreditCardId string
+	Number       string
+	UserRefer    string
+}
+
+*/
+/* type UserTest struct {
+	MemberNumber uint         `gorm:"PRIMARY_KEY"`
+	CreditCards  []CreditCard `gorm:"foreignKey:UserNumber;references:MemberNumber"`
+}
+
+type CreditCard struct {
+	gorm.Model
+	Number     string
+	UserNumber uint
+}
+*/
+/* type UserTest struct {
+	gorm.Model
+	Name       string     `gorm:"index"`
+	CreditCard CreditCard `gorm:"foreignkey:UserName;references:name"`
+}
+
+type CreditCard struct {
+	gorm.Model
+	Number   string
+	UserName string
+}
+*/
