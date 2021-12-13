@@ -121,7 +121,15 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 	tickets := []models.Ticket{}
 	ticketsTotal := []models.Ticket{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Find(&tickets); tx.Error != nil {
+	/* test */
+
+	query := map[string]interface{}{}
+
+	if c.Query("customer_id") != "" {
+		query["customer_id"] = c.Query("customer_id")
+	}
+
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Where(query).Find(&tickets); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

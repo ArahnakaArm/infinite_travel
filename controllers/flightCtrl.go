@@ -21,6 +21,7 @@ type flightController struct {
 
 func NewFlightController(db *gorm.DB) FlightController {
 	db.AutoMigrate(models.Flight{})
+	db.AutoMigrate(models.Airport{})
 
 	return flightController{db}
 }
@@ -33,16 +34,24 @@ func (s flightController) CreateFlight(c *fiber.Ctx) error {
 		return services.MissingAndInvalidResponse(c)
 	}
 
+	if !services.DateTimeValidate(flightReqBody.ArriveTime) || !services.DateTimeValidate(flightReqBody.DepartTime) {
+		return services.MissingAndInvalidResponse(c)
+	}
+
 	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	flight := models.Flight{
-		FlightId:   uint(u64),
-		FlightName: flightReqBody.FlightName,
-		AirlineId:  flightReqBody.AirlineId,
-		PlaneMId:   flightReqBody.PlaneMId,
+		FlightId:             uint(u64),
+		FlightName:           flightReqBody.FlightName,
+		AirlineId:            flightReqBody.AirlineId,
+		PlaneMId:             flightReqBody.PlaneMId,
+		DestinationAirportId: flightReqBody.DestinationAirportId,
+		OriginAirportId:      flightReqBody.OriginAirportId,
+		DepartTime:           flightReqBody.DepartTime,
+		ArriveTime:           flightReqBody.ArriveTime,
 	}
 
 	if tx := s.db.Create(&flight); tx.Error != nil {
@@ -77,7 +86,7 @@ func (s flightController) GetAllFlight(c *fiber.Ctx) error {
 	flights := []models.Flight{}
 	flightsTotal := []models.Flight{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneM").Preload("Airline").Find(&flights); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneM").Preload("Airline").Preload("DestinationAirport").Preload("OriginAirport").Find(&flights); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

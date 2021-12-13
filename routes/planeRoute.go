@@ -11,8 +11,8 @@ func PlaneRoute(app *fiber.App, db *gorm.DB) {
 
 	v1 := app.Group("/v1")
 
-	customer := v1.Group("plane")
+	plane := v1.Group("plane")
 
-	customer.Post("/", controllers.NewPlaneController(db).CreatePlane)
+	plane.Post("/", controllers.NewPlaneController(db).CreatePlane)
 
 }

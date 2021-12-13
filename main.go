@@ -61,7 +61,7 @@ func initTimeZone() {
 
 func initDB() *gorm.DB {
 
-	dsn := fmt.Sprintf("%v:%v@/%v?parseTime=true",
+	dsn := fmt.Sprintf("%v:%v@/%v?parseTime=True&loc=Local",
 		viper.GetString("db.username"),
 		viper.GetString("db.password"),
 		viper.GetString("db.database"))
@@ -88,4 +88,5 @@ func loadRoutes(app *fiber.App, db *gorm.DB) {
 	routes.FlightRoute(app, db)
 	routes.AirlineRoute(app, db)
 	routes.PlaneRoute(app, db)
+	routes.AirportRoute(app, db)
 }

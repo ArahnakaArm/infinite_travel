@@ -11,10 +11,10 @@ func AirlineRoute(app *fiber.App, db *gorm.DB) {
 
 	v1 := app.Group("/v1")
 
-	customer := v1.Group("airline")
+	airline := v1.Group("airline")
 
-	customer.Post("/", controllers.NewAirlineController(db).CreateAirline)
+	airline.Post("/", controllers.NewAirlineController(db).CreateAirline)
 
-	customer.Get("/", controllers.NewAirlineController(db).GetAllAirline)
+	airline.Get("/", controllers.NewAirlineController(db).GetAllAirline)
 
 }
