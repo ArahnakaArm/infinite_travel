@@ -17,4 +17,9 @@ func AirlineRoute(app *fiber.App, db *gorm.DB) {
 
 	airline.Get("/", controllers.NewAirlineController(db).GetAllAirline)
 
+	airline.Get("/:id", controllers.NewAirlineController(db).GetAirlineById)
+
+	airline.Patch("/:id", controllers.NewAirlineController(db).UpdateSomeField)
+
+	airline.Delete("/:id", controllers.NewAirlineController(db).DeleteAirline)
 }

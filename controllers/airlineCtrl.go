@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"intravel/models"
 	"intravel/services"
@@ -13,6 +14,9 @@ import (
 type AirlineController interface {
 	CreateAirline(c *fiber.Ctx) error
 	GetAllAirline(c *fiber.Ctx) error
+	GetAirlineById(c *fiber.Ctx) error
+	UpdateSomeField(c *fiber.Ctx) error
+	DeleteAirline(c *fiber.Ctx) error
 }
 
 type airlineController struct {
@@ -98,4 +102,72 @@ func (s airlineController) GetAllAirline(c *fiber.Ctx) error {
 
 	return services.SuccessResponseResDataRowCount(c, airlines, len(airlines), len(airlineTotal))
 
+}
+
+func (s airlineController) GetAirlineById(c *fiber.Ctx) error {
+
+	airlineId := c.Params("id")
+
+	airlineRes := models.Airline{}
+
+	if tx := s.db.First(&airlineRes, "airline_id = ?", airlineId); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, airlineRes)
+}
+
+func (s airlineController) UpdateSomeField(c *fiber.Ctx) error {
+
+	airlineId := c.Params("id")
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(c.Body()), &result)
+
+	if elm, ok := result["airline_name"]; ok {
+		var count int64
+
+		s.db.Model(&models.Airline{}).Where("airline_name = ?", elm).Count(&count)
+
+		if count > 0 {
+			return services.ConflictResponse(c)
+		}
+	}
+
+	if elm, ok := result["airline_code"]; ok {
+		var count int64
+
+		s.db.Model(&models.Airline{}).Where("airline_code = ?", elm).Count(&count)
+
+		if count > 0 {
+			return services.ConflictResponse(c)
+		}
+	}
+
+	airline := models.Airline{}
+
+	if tx := s.db.Model(&airline).Where("airline_id = ?", airlineId).Updates(result); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	airlineRes := models.Airline{}
+
+	if tx := s.db.First(&airlineRes, "airline_id = ?", airlineId); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, airlineRes)
+}
+
+func (s airlineController) DeleteAirline(c *fiber.Ctx) error {
+
+	airlineId := c.Params("id")
+
+	airline := models.Airline{}
+
+	if tx := s.db.Where("airline_id = ?", airlineId).Delete(&airline); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponse(c)
 }
