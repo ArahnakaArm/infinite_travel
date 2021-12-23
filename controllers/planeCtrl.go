@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"intravel/models"
 	"intravel/services"
@@ -12,6 +13,10 @@ import (
 
 type PlaneController interface {
 	CreatePlane(c *fiber.Ctx) error
+	GetAllPlane(c *fiber.Ctx) error
+	GetPlaneById(c *fiber.Ctx) error
+	DeletePlane(c *fiber.Ctx) error
+	UpdateSomeFieldPlane(c *fiber.Ctx) error
 }
 
 type planeController struct {
@@ -60,4 +65,136 @@ func (s planeController) CreatePlane(c *fiber.Ctx) error {
 	}
 
 	return services.CreatedResponse(c)
+}
+
+func (s planeController) GetAllPlane(c *fiber.Ctx) error {
+	offset := -1
+	limit := -1
+	searchQuery := "%%"
+	/* 	planeCodeQuery := "%%" */
+	/* 	fmt.Println(string(c.Request().URI().QueryString())) */
+	/* planeQuery := map[string]interface{}{"plane_name": "Plane"} */
+
+	/* 	result["name"] = "noob" */
+	/* 	values := url.Values{}
+	   	values.Add("api_key", "key_from_environment_or_flag")
+	   	values.Add("another_thing", "foobar")
+	   	query := values.Encode()
+	*/
+	/* 	fmt.Println(query) */
+	/* fmt.Println(planeQuery) */
+	/* return nil */
+
+	if c.Query("search") != "" {
+		searchQuery = "%" + c.Query("search") + "%"
+	}
+
+	/* 	if c.Query("plane_code") != "" {
+		planeCodeQuery = "%" + c.Query("plane_code") + "%"
+	} */
+	/* 	fmt.Println(planeNameQuery) */
+
+	/* 	return nil */
+
+	if c.Query("limit") != "" {
+		limitInt, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		limit = limitInt
+	}
+
+	if c.Query("offset") != "" {
+		offsetInt, err := strconv.Atoi(c.Query("offset"))
+		if err != nil {
+			return services.MissingAndInvalidResponse(c)
+		}
+
+		offset = offsetInt
+	}
+
+	planes := []models.PlaneM{}
+	planesTotal := []models.PlaneM{}
+
+	/* 	fmt.Println(planeNameQuery) */
+
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planes); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	if tx := s.db.Order("created_at desc").Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planesTotal); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResDataRowCount(c, planes, len(planes), len(planesTotal))
+}
+
+func (s planeController) GetPlaneById(c *fiber.Ctx) error {
+
+	planeId := c.Params("id")
+
+	plane := models.PlaneM{}
+
+	if tx := s.db.First(&plane, "plane_id = ?", planeId); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, plane)
+}
+
+func (s planeController) DeletePlane(c *fiber.Ctx) error {
+
+	planeId := c.Params("id")
+
+	plane := models.PlaneM{}
+
+	if tx := s.db.Where("plane_id = ?", planeId).Delete(&plane); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponse(c)
+}
+
+func (s planeController) UpdateSomeFieldPlane(c *fiber.Ctx) error {
+
+	planeId := c.Params("id")
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(c.Body()), &result)
+
+	if elm, ok := result["plane_name"]; ok {
+		var count int64
+
+		s.db.Model(&models.PlaneM{}).Where("plane_name = ?", elm).Not("plane_id = ?", planeId).Count(&count)
+
+		if count > 0 {
+			return services.ConflictResponse(c)
+		}
+	}
+
+	if elm, ok := result["plane_code"]; ok {
+		var count int64
+
+		s.db.Model(&models.PlaneM{}).Where("plane_code = ?", elm).Not("plane_id = ?", planeId).Count(&count)
+
+		if count > 0 {
+			return services.ConflictResponse(c)
+		}
+	}
+
+	plane := models.PlaneM{}
+
+	if tx := s.db.Model(&plane).Where("plane_id = ?", planeId).Updates(result); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	planeRes := models.PlaneM{}
+
+	if tx := s.db.First(&planeRes, "plane_id = ?", planeId); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, planeRes)
+
 }

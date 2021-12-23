@@ -15,4 +15,12 @@ func AirportRoute(app *fiber.App, db *gorm.DB) {
 
 	airport.Post("/", controllers.NewAirportController(db).CreateAirport)
 
+	airport.Get("/", controllers.NewAirportController(db).GetAllAirport)
+
+	airport.Get("/:id", controllers.NewAirportController(db).GetAirportById)
+
+	airport.Delete("/:id", controllers.NewAirportController(db).DeleteAirport)
+
+	airport.Patch("/:id", controllers.NewAirportController(db).UpdateSomeFieldAirPort)
+
 }

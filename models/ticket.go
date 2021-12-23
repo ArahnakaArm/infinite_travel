@@ -12,7 +12,6 @@ type Ticket struct {
 	TicketNumber string         `gorm:"not null" json:"ticket_number"`
 	FlightId     uint           `json:"flight_id"`
 	Flight       Flight         `json:"flight"`
-	Seat         string         `gorm:"not null;unique" json:"seat"`
 	Status       string         `gorm:"not null" json:"status"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`

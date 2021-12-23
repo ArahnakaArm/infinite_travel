@@ -1,18 +1,23 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"intravel/models"
 	"intravel/services"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
 
 type FlightController interface {
 	CreateFlight(c *fiber.Ctx) error
 	GetAllFlight(c *fiber.Ctx) error
+	GetFlightById(c *fiber.Ctx) error
+	UpdateSomeFieldFlight(c *fiber.Ctx) error
+	DeleteFlight(c *fiber.Ctx) error
 }
 
 type flightController struct {
@@ -34,8 +39,20 @@ func (s flightController) CreateFlight(c *fiber.Ctx) error {
 		return services.MissingAndInvalidResponse(c)
 	}
 
+	if errs := validator.Validate(flightReqBody); errs != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
 	if !services.DateTimeValidate(flightReqBody.ArriveTime) || !services.DateTimeValidate(flightReqBody.DepartTime) {
 		return services.MissingAndInvalidResponse(c)
+	}
+
+	var conflictNameCount int64
+
+	s.db.Model(&models.Flight{}).Where("flight_name = ?", flightReqBody.FlightName).Count(&conflictNameCount)
+
+	if conflictNameCount > 0 {
+		return services.ConflictResponse(c)
 	}
 
 	u64, err := strconv.ParseUint(getNumber12digit(), 12, 64)
@@ -95,4 +112,62 @@ func (s flightController) GetAllFlight(c *fiber.Ctx) error {
 	}
 
 	return services.SuccessResponseResDataRowCount(c, flights, len(flights), len(flightsTotal))
+}
+
+func (s flightController) GetFlightById(c *fiber.Ctx) error {
+
+	flightId := c.Params("id")
+
+	flightRes := models.Flight{}
+
+	if tx := s.db.Preload("PlaneM").Preload("Airline").Preload("DestinationAirport").Preload("OriginAirport").First(&flightRes, "flight_id = ?", flightId); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, flightRes)
+}
+
+func (s flightController) UpdateSomeFieldFlight(c *fiber.Ctx) error {
+
+	flightId := c.Params("id")
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(c.Body()), &result)
+
+	if elm, ok := result["flight_name"]; ok {
+		var count int64
+
+		s.db.Model(&models.Flight{}).Where("flight_name = ?", elm).Not("flight_id = ?", flightId).Count(&count)
+
+		if count > 0 {
+			return services.ConflictResponse(c)
+		}
+	}
+
+	flight := models.Flight{}
+
+	if tx := s.db.Model(&flight).Where("flight_id = ?", flightId).Updates(result); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	flightRes := models.Flight{}
+
+	if tx := s.db.Preload("PlaneM").Preload("Airline").Preload("DestinationAirport").Preload("OriginAirport").First(&flightRes, "flight_id = ?", flightId); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, flightRes)
+}
+
+func (s flightController) DeleteFlight(c *fiber.Ctx) error {
+
+	flightId := c.Params("id")
+
+	flightModel := models.Flight{}
+
+	if tx := s.db.Where("flight_id = ?", flightId).Delete(&flightModel); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponse(c)
 }

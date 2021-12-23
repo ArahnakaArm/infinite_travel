@@ -80,3 +80,24 @@ func ConflictResponse(c *fiber.Ctx) error {
 		"resultMessage": responseMessage.RESULT_MESSAGE_CONFLICT,
 	})
 }
+
+func NotFoundFlightResponse(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusNotFound * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_DATA_NOT_FOUND_FLIGHT,
+	})
+}
+
+func ConflictSeatResponse(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusConflict * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_CONFLICT_SEAT,
+	})
+}
+
+func SeatOverLimitResponse(c *fiber.Ctx) error {
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"resultCode":    strconv.Itoa(fiber.StatusOK * 100),
+		"resultMessage": responseMessage.RESULT_MESSAGE_SEAT_OVER_LIMIT,
+	})
+}

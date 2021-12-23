@@ -110,7 +110,7 @@ func (s airlineController) GetAirlineById(c *fiber.Ctx) error {
 
 	airlineRes := models.Airline{}
 
-	if tx := s.db.First(&airlineRes, "airline_id = ?", airlineId); tx.Error != nil {
+	if tx := s.db.Preload("PlaneServices").First(&airlineRes, "airline_id = ?", airlineId); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
@@ -127,7 +127,7 @@ func (s airlineController) UpdateSomeField(c *fiber.Ctx) error {
 	if elm, ok := result["airline_name"]; ok {
 		var count int64
 
-		s.db.Model(&models.Airline{}).Where("airline_name = ?", elm).Count(&count)
+		s.db.Model(&models.Airline{}).Where("airline_name = ?", elm).Not("airline_id = ?", airlineId).Count(&count)
 
 		if count > 0 {
 			return services.ConflictResponse(c)
@@ -137,7 +137,7 @@ func (s airlineController) UpdateSomeField(c *fiber.Ctx) error {
 	if elm, ok := result["airline_code"]; ok {
 		var count int64
 
-		s.db.Model(&models.Airline{}).Where("airline_code = ?", elm).Count(&count)
+		s.db.Model(&models.Airline{}).Where("airline_code = ?", elm).Not("airline_id = ?", airlineId).Count(&count)
 
 		if count > 0 {
 			return services.ConflictResponse(c)

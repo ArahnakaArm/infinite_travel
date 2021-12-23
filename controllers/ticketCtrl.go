@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"intravel/models"
 	"intravel/services"
@@ -13,6 +14,9 @@ import (
 type TicketController interface {
 	CreateTicket(c *fiber.Ctx) error
 	GetAllTickets(c *fiber.Ctx) error
+	FindTicketById(c *fiber.Ctx) error
+	DeleteTicket(c *fiber.Ctx) error
+	UpdateSomeFieldTicket(c *fiber.Ctx) error
 }
 
 type ticketController struct {
@@ -24,6 +28,7 @@ func NewTicketController(db *gorm.DB) TicketController {
 	/* db.AutoMigrate(models.UserTest{})
 	db.AutoMigrate(models.CreditCard{})
 	*/
+
 	db.AutoMigrate(models.Ticket{})
 	db.AutoMigrate(models.Seat{})
 
@@ -48,7 +53,7 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 
 	flightTicket := generateTicket(flightName)
 
-	seat := generateSeat()
+	/* seat := generateSeat() */
 
 	/* fmt.Println(seat)
 	 */
@@ -71,27 +76,26 @@ func (s ticketController) CreateTicket(c *fiber.Ctx) error {
 		FlightId:     ticketReqBody.FlightId,
 		Status:       ticketReqBody.Status,
 		TicketNumber: flightTicket,
-		Seat:         seat,
 	}
 
 	if tx := s.db.Create(&ticket); tx.Error != nil {
 		return services.InternalErrorResponse(c)
 	}
 
-	u64Seat, err := strconv.ParseUint(getNumber12digit(), 12, 64)
-	if err != nil {
-		fmt.Println(err)
-	}
+	/* 	u64Seat, err := strconv.ParseUint(getNumber12digit(), 12, 64)
+	   	if err != nil {
+	   		fmt.Println(err)
+	   	}
 
-	seatInsert := models.Seat{
-		SeatId:     uint(u64Seat),
-		SeatNumber: seat,
-		FlightId:   ticketReqBody.FlightId,
-	}
+	   	seatInsert := models.Seat{
+	   		SeatId:     uint(u64Seat),
+	   		SeatNumber: seat,
+	   		FlightId:   ticketReqBody.FlightId,
+	   	}
 
-	if tx := s.db.Create(&seatInsert); tx.Error != nil {
-		return services.InternalErrorResponse(c)
-	}
+	   	if tx := s.db.Create(&seatInsert); tx.Error != nil {
+	   		return services.InternalErrorResponse(c)
+	   	} */
 
 	return services.CreatedResponse(c)
 }
@@ -129,7 +133,7 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 		query["customer_id"] = c.Query("customer_id")
 	}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Where(query).Find(&tickets); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Preload("Flight.DestinationAirport").Preload("Flight.OriginAirport").Where(query).Find(&tickets); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
@@ -138,4 +142,58 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 	}
 
 	return services.SuccessResponseResDataRowCount(c, tickets, len(tickets), len(ticketsTotal))
+}
+
+func (s ticketController) FindTicketById(c *fiber.Ctx) error {
+
+	ticketId := c.Params("id")
+
+	ticket := models.Ticket{}
+
+	if tx := s.db.Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Preload("Flight.DestinationAirport").Preload("Flight.OriginAirport").First(&ticket, "ticket_id = ?", ticketId); tx.Error != nil {
+		return services.NotFoundResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, ticket)
+
+}
+
+func (s ticketController) DeleteTicket(c *fiber.Ctx) error {
+
+	ticketId := c.Params("id")
+
+	ticket := models.Ticket{}
+
+	if tx := s.db.Where("ticket_id = ?", ticketId).Delete(&ticket); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponse(c)
+}
+
+func (s ticketController) UpdateSomeFieldTicket(c *fiber.Ctx) error {
+
+	ticketId := c.Params("id")
+
+	result := make(map[string]interface{})
+	json.Unmarshal([]byte(c.Body()), &result)
+
+	if _, ok := result["ticket_number"]; ok {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	ticket := models.Ticket{}
+
+	if tx := s.db.Model(&ticket).Where("ticket_id = ?", ticketId).Updates(result); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	ticketRes := models.Ticket{}
+
+	if tx := s.db.Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Preload("Flight.DestinationAirport").Preload("Flight.OriginAirport").First(&ticketRes, "ticket_id = ?", ticketId); tx.Error != nil {
+		return services.InternalErrorResponse(c)
+	}
+
+	return services.SuccessResponseResData(c, ticketRes)
+
 }

@@ -62,3 +62,7 @@ func hashPassword(pass string) (hashedPassword string, err error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(pass), 14)
 	return string(bytes), err
 }
+
+func padNumberWithZero(value int) string {
+	return fmt.Sprintf("%02d", value)
+}

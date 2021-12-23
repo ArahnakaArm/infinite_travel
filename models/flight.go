@@ -23,16 +23,16 @@ func (t *Datetime) UnmarshalJSON(input []byte) error {
 
 type Flight struct {
 	FlightId             uint           `gorm:"PRIMARY_KEY;autoIncrement:false" json:"flight_id"`
-	FlightName           string         `gorm:"not null" json:"flight_name"`
-	PlaneMId             uint           `json:"plane_id"`
-	PlaneM               PlaneM         `json:"plane_serve"`
-	AirlineId            uint           `json:"airline_id"`
+	FlightName           string         `gorm:"not null" json:"flight_name" validate:"nonnil,nonzero"`
+	PlaneMId             uint           `json:"plane_id" validate:"nonnil,nonzero"`
+	PlaneM               PlaneM         `json:"plane_serve" `
+	AirlineId            uint           `json:"airline_id" validate:"nonnil,nonzero"`
 	Airline              Airline        `json:"airline"`
-	DepartTime           string         `gorm:"not null" json:"depart_time"`
-	ArriveTime           string         `gorm:"not null" json:"arrive_time"`
-	DestinationAirportId uint           `json:"destination_airport_id"`
+	DepartTime           string         `gorm:"not null" json:"depart_time" validate:"nonnil,nonzero"`
+	ArriveTime           string         `gorm:"not null" json:"arrive_time" validate:"nonnil,nonzero"`
+	DestinationAirportId uint           `json:"destination_airport_id" validate:"nonnil,nonzero"`
 	DestinationAirport   Airport        `json:"destination_airport"`
-	OriginAirportId      uint           `json:"origin_airport_id"`
+	OriginAirportId      uint           `json:"origin_airport_id" validate:"nonnil,nonzero"`
 	OriginAirport        Airport        `json:"origin_airport"`
 	CreatedAt            time.Time      `json:"created_at"`
 	UpdatedAt            time.Time      `json:"updated_at"`
