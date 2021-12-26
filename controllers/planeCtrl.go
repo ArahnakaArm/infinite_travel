@@ -89,6 +89,12 @@ func (s planeController) GetAllPlane(c *fiber.Ctx) error {
 		searchQuery = "%" + c.Query("search") + "%"
 	}
 
+	planeQuery := map[string]interface{}{}
+
+	if c.Query("airline_id") != "" {
+		planeQuery["airline_id"] = c.Query("airline_id")
+	}
+
 	/* 	if c.Query("plane_code") != "" {
 		planeCodeQuery = "%" + c.Query("plane_code") + "%"
 	} */
@@ -119,11 +125,11 @@ func (s planeController) GetAllPlane(c *fiber.Ctx) error {
 
 	/* 	fmt.Println(planeNameQuery) */
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planes); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planes); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Order("created_at desc").Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planesTotal); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planesTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

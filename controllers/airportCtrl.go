@@ -70,6 +70,16 @@ func (s airportController) GetAllAirport(c *fiber.Ctx) error {
 	offset := -1
 	limit := -1
 
+	excludeBody := map[string]interface{}{}
+
+	if c.Query("exclude") != "" {
+		excludeIdInt, err := strconv.Atoi(c.Query("exclude"))
+		if err != nil {
+			return services.InternalErrorResponse(c)
+		}
+		excludeBody["airport_id"] = excludeIdInt
+	}
+
 	if c.Query("limit") != "" {
 		limitInt, err := strconv.Atoi(c.Query("limit"))
 		if err != nil {
@@ -91,11 +101,11 @@ func (s airportController) GetAllAirport(c *fiber.Ctx) error {
 	airports := []models.Airport{}
 	airportsTotal := []models.Airport{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Find(&airports); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Not(excludeBody).Find(&airports); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Find(&airportsTotal); tx.Error != nil {
+	if tx := s.db.Not(excludeBody).Find(&airportsTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
