@@ -9,6 +9,7 @@ import (
 type PlaneM struct {
 	PlaneId   uint           `gorm:"PRIMARY_KEY;autoIncrement:false" json:"plane_id"`
 	AirlineId uint           `json:"airline_id"`
+	Airline   Airline        `json:"airline"`
 	PlaneName string         `gorm:"not null" json:"plane_name"`
 	PlaneCode string         `gorm:"not null" json:"plane_code"`
 	Status    string         `gorm:"not null" json:"status"`

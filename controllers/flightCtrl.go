@@ -81,6 +81,11 @@ func (s flightController) CreateFlight(c *fiber.Ctx) error {
 func (s flightController) GetAllFlight(c *fiber.Ctx) error {
 	offset := -1
 	limit := -1
+	searchQuery := "%%"
+
+	if c.Query("search") != "" {
+		searchQuery = "%" + c.Query("search") + "%"
+	}
 
 	if c.Query("limit") != "" {
 		limitInt, err := strconv.Atoi(c.Query("limit"))
@@ -103,11 +108,11 @@ func (s flightController) GetAllFlight(c *fiber.Ctx) error {
 	flights := []models.Flight{}
 	flightsTotal := []models.Flight{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneM").Preload("Airline").Preload("DestinationAirport").Preload("OriginAirport").Find(&flights); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("PlaneM").Preload("Airline").Preload("DestinationAirport").Preload("OriginAirport").Where("flight_name LIKE ? ", searchQuery).Find(&flights); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Find(&flightsTotal); tx.Error != nil {
+	if tx := s.db.Where("flight_name LIKE ?", searchQuery).Find(&flightsTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

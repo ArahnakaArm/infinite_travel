@@ -125,11 +125,11 @@ func (s planeController) GetAllPlane(c *fiber.Ctx) error {
 
 	/* 	fmt.Println(planeNameQuery) */
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planes); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Preload("Airline").Limit(limit).Offset(offset).Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planes); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Order("created_at desc").Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planesTotal); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Preload("Airline").Where(planeQuery).Where("plane_name LIKE ? OR plane_code LIKE ?", searchQuery, searchQuery).Find(&planesTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

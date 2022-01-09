@@ -127,6 +127,11 @@ func (s exploreController) GetExploreById(c *fiber.Ctx) error {
 func (s exploreController) GetExplores(c *fiber.Ctx) error {
 	offset := -1
 	limit := -1
+	searchQuery := "%%"
+
+	if c.Query("search") != "" {
+		searchQuery = "%" + c.Query("search") + "%"
+	}
 
 	if c.Query("limit") != "" {
 		limitInt, err := strconv.Atoi(c.Query("limit"))
@@ -150,11 +155,11 @@ func (s exploreController) GetExplores(c *fiber.Ctx) error {
 
 	exploresTotal := []models.Explore{}
 
-	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Content").Find(&explores); tx.Error != nil {
+	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Content").Where("title LIKE ? OR author LIKE ?", searchQuery, searchQuery).Find(&explores); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Find(&exploresTotal); tx.Error != nil {
+	if tx := s.db.Where("title LIKE ? OR author LIKE ?", searchQuery, searchQuery).Find(&exploresTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 

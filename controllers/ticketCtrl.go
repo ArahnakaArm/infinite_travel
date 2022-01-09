@@ -133,11 +133,15 @@ func (s ticketController) GetAllTickets(c *fiber.Ctx) error {
 		query["customer_id"] = c.Query("customer_id")
 	}
 
+	if c.Query("ticket_number") != "" {
+		query["ticket_number"] = c.Query("ticket_number")
+	}
+
 	if tx := s.db.Order("created_at desc").Limit(limit).Offset(offset).Preload("Flight").Preload("Flight.PlaneM").Preload("Flight.Airline").Preload("Flight.DestinationAirport").Preload("Flight.OriginAirport").Where(query).Find(&tickets); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
-	if tx := s.db.Find(&ticketsTotal); tx.Error != nil {
+	if tx := s.db.Where(query).Find(&ticketsTotal); tx.Error != nil {
 		return services.NotFoundResponse(c)
 	}
 
