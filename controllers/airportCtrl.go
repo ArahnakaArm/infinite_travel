@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
 
@@ -35,6 +36,10 @@ func (s airportController) CreateAirport(c *fiber.Ctx) error {
 	airportReq := models.Airport{}
 
 	if err := c.BodyParser(&airportReq); err != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	if errs := validator.Validate(airportReq); errs != nil {
 		return services.MissingAndInvalidResponse(c)
 	}
 

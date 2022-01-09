@@ -8,11 +8,11 @@ import (
 
 type Ticket struct {
 	TicketId     uint           `gorm:"PRIMARY_KEY;autoIncrement:false" json:"ticket_id"`
-	CustomerId   uint           `json:"customer_id"`
-	TicketNumber string         `gorm:"not null" json:"ticket_number"`
-	FlightId     uint           `json:"flight_id"`
+	CustomerId   uint           `json:"customer_id" validate:"nonzero"`
+	TicketNumber string         `gorm:"not null" json:"ticket_number" `
+	FlightId     uint           `json:"flight_id" validate:"nonzero"`
 	Flight       Flight         `json:"flight"`
-	Status       string         `gorm:"not null" json:"status"`
+	Status       string         `gorm:"not null" json:"status" validate:"regexp=^[a-zA-Z]*$,nonzero"`
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"deleted_at"`

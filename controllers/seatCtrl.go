@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
 
@@ -27,13 +28,21 @@ func NewSeatController(db *gorm.DB) SeatController {
 func (s seatController) CreateSeat(c *fiber.Ctx) error {
 
 	type seatReqModel struct {
-		FligthId   uint `json:"flight_id"`
-		MaxRowSeat int  `json:"row_seat"`
+		FligthId   uint `json:"flight_id" validate:"nonzero"`
+		MaxRowSeat int  `json:"row_seat" validate:"nonzero"`
 	}
 
 	seatBody := seatReqModel{}
 
 	if err := c.BodyParser(&seatBody); err != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	if errs := validator.Validate(seatBody); errs != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	if seatBody.MaxRowSeat <= 0 {
 		return services.MissingAndInvalidResponse(c)
 	}
 

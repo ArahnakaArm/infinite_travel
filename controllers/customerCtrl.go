@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
 
@@ -34,6 +35,10 @@ func (s customerController) CreateCustomer(c *fiber.Ctx) error {
 	custModel := models.Customer{}
 
 	if err := c.BodyParser(&customerReq); err != nil {
+		return services.MissingAndInvalidResponse(c)
+	}
+
+	if errs := validator.Validate(customerReq); errs != nil {
 		return services.MissingAndInvalidResponse(c)
 	}
 
