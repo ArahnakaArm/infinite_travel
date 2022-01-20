@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
@@ -20,7 +21,10 @@ type seatController struct {
 }
 
 func NewSeatController(db *gorm.DB) SeatController {
-	db.AutoMigrate(models.Seat{})
+	if viper.GetString("ctrl.autoMigrate") == "true" {
+		db.AutoMigrate(models.Seat{})
+	}
+	/* 	db.AutoMigrate(models.Seat{}) */
 
 	return seatController{db}
 }

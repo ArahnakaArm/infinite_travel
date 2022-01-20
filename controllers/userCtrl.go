@@ -33,7 +33,10 @@ type userController struct {
 }
 
 func NewUserController(db *gorm.DB) UserController {
-	db.AutoMigrate(models.User{})
+	/* 	db.AutoMigrate(models.User{}) */
+	if viper.GetString("ctrl.autoMigrate") == "true" {
+		db.AutoMigrate(models.User{})
+	}
 	return userController{db}
 }
 

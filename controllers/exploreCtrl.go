@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
@@ -24,8 +25,11 @@ type exploreController struct {
 }
 
 func NewExploreController(db *gorm.DB) ExploreController {
-	db.AutoMigrate(models.Explore{})
-	db.AutoMigrate(models.ExploreContent{})
+	if viper.GetString("ctrl.autoMigrate") == "true" {
+		db.AutoMigrate(models.Explore{})
+		db.AutoMigrate(models.ExploreContent{})
+	}
+	/*  */
 
 	return exploreController{db}
 }

@@ -1,0 +1,22 @@
+app:
+  port: 3005
+
+db:
+  ip: infinitetravel.ctm0lxogoxgt.ap-southeast-1.rds.amazonaws.com
+  port: 3306
+  driver: "mysql"
+  username: admin
+  password: password
+  database: infinite-travel
+
+appAuth:
+  tokenSecret: "secret"
+
+s3:
+  bucketName: "infinite-travel"
+  region: "ap-southeast-1"
+  accessKeyId: "AKIA3IA7PUU6AU55I4LD"
+  accessSecretKey: "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"
+
+ctrl:
+  autoMigrate: "false"

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
@@ -24,14 +25,17 @@ type ticketController struct {
 }
 
 func NewTicketController(db *gorm.DB) TicketController {
-
+	if viper.GetString("ctrl.autoMigrate") == "true" {
+		db.AutoMigrate(models.Ticket{})
+		db.AutoMigrate(models.Seat{})
+	}
 	/* db.AutoMigrate(models.UserTest{})
 	db.AutoMigrate(models.CreditCard{})
 	*/
-
-	db.AutoMigrate(models.Ticket{})
-	db.AutoMigrate(models.Seat{})
-
+	/*
+		db.AutoMigrate(models.Ticket{})
+		db.AutoMigrate(models.Seat{})
+	*/
 	return ticketController{db}
 }
 

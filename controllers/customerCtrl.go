@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"gopkg.in/validator.v2"
 	"gorm.io/gorm"
 )
@@ -21,8 +22,9 @@ type customerController struct {
 }
 
 func NewCustomerController(db *gorm.DB) CustomerController {
-	db.AutoMigrate(models.Customer{})
-
+	if viper.GetString("ctrl.autoMigrate") == "true" {
+		db.AutoMigrate(models.Customer{})
+	}
 	return customerController{db}
 }
 

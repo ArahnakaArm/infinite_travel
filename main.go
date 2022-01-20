@@ -61,9 +61,11 @@ func initTimeZone() {
 
 func initDB() *gorm.DB {
 
-	dsn := fmt.Sprintf("%v:%v@/%v?parseTime=True&loc=Local",
+	dsn := fmt.Sprintf("%v:%v@(%v:%v)/%v?parseTime=True&loc=Local",
 		viper.GetString("db.username"),
 		viper.GetString("db.password"),
+		viper.GetString("db.ip"),
+		viper.GetString("db.port"),
 		viper.GetString("db.database"))
 
 	dial := mysql.Open(dsn)
